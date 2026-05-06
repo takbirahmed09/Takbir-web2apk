@@ -1,0 +1,41 @@
+name: Web-to-APK Builder
+
+on:
+  workflow_dispatch:
+    inputs:
+      website_url:
+        description: 'Enter the Website URL'
+        required: true
+        default: 'https://google.com'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Inject URL into MainActivity
+        run: |
+          # MainActivity.java ফাইলে ইউজার থেকে পাওয়া URL টি বসানো হচ্ছে
+          sed -i "s|REPLACE_ME_URL|${{ github.event.inputs.website_url }}|g" app/src/main/java/com/takbir/myapp/MainActivity.java
+
+      - name: Grant Execute Permission for Gradlew
+        run: chmod +x gradlew
+
+      - name: Build APK with Gradle
+        run: ./gradlew assembleDebug
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-release-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
