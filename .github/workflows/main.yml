@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4  # v3 থেকে v4 করা হয়েছে
+        uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4 # v3 থেকে v4 করা হয়েছে
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
@@ -25,7 +25,16 @@ jobs:
 
       - name: Inject URL into MainActivity
         run: |
-          sed -i "s|REPLACE_ME_URL|${{ github.event.inputs.website_url }}|g" app/src/main/java/com/takbir/myapp/MainActivity.java
+          # যদি আপনার MainActivity.java ফাইলটি মূল (Main) ফোল্ডারে থাকে
+          if [ -f "MainActivity.java" ]; then
+            sed -i "s|REPLACE_ME_URL|${{ github.event.inputs.website_url }}|g" MainActivity.java
+          # যদি ফাইলটি সঠিক অ্যান্ড্রয়েড পাথে থাকে
+          elif [ -f "app/src/main/java/com/takbir/myapp/MainActivity.java" ]; then
+            sed -i "s|REPLACE_ME_URL|${{ github.event.inputs.website_url }}|g" app/src/main/java/com/takbir/myapp/MainActivity.java
+          else
+            echo "MainActivity.java not found in common locations!"
+            exit 1
+          fi
 
       - name: Grant Execute Permission for Gradlew
         run: chmod +x gradlew
@@ -34,7 +43,7 @@ jobs:
         run: ./gradlew assembleDebug
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4 # এখানে v3 এর বদলে v4 দিতে হবে
+        uses: actions/upload-artifact@v4
         with:
-          name: app-debug-apk
+          name: Takbir-App-Debug
           path: app/build/outputs/apk/debug/app-debug.apk
