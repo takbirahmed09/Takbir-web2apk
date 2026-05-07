@@ -23,16 +23,20 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      # এটি মিসিং জার ফাইলটি অটোমেটিক ঠিক করবে
+      - name: Download Gradle Wrapper JAR
+        run: |
+          mkdir -p gradle/wrapper
+          wget https://github.com/gradle/gradle/raw/master/gradle/wrapper/gradle-wrapper.jar -O gradle/wrapper/gradle-wrapper.jar
+
       - name: Inject URL into MainActivity
         run: |
-          # যদি আপনার MainActivity.java ফাইলটি মূল (Main) ফোল্ডারে থাকে
           if [ -f "MainActivity.java" ]; then
             sed -i "s|REPLACE_ME_URL|${{ github.event.inputs.website_url }}|g" MainActivity.java
-          # যদি ফাইলটি সঠিক অ্যান্ড্রয়েড পাথে থাকে
           elif [ -f "app/src/main/java/com/takbir/myapp/MainActivity.java" ]; then
             sed -i "s|REPLACE_ME_URL|${{ github.event.inputs.website_url }}|g" app/src/main/java/com/takbir/myapp/MainActivity.java
           else
-            echo "MainActivity.java not found in common locations!"
+            echo "MainActivity.java not found!"
             exit 1
           fi
 
