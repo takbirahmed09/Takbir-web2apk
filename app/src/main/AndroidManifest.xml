@@ -5,7 +5,7 @@
 
     <application
         android:allowBackup="true"
-        android:label="Takbir Web App"
+        android:label="Takbir"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"> <activity
             android:name="com.takbir.myapp.MainActivity" 
