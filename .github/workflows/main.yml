@@ -4,14 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       website_url:
-        description: 'Enter the Website URL'
+        description: 'Website URL'
         required: true
-        default: 'https://google.com'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -21,32 +19,19 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle
 
-      # এটি মিসিং জার ফাইলটি অটোমেটিক ঠিক করবে
-      - name: Download Gradle Wrapper JAR
+      - name: Replace Website URL
         run: |
-          mkdir -p gradle/wrapper
-          wget https://github.com/gradle/gradle/raw/master/gradle/wrapper/gradle-wrapper.jar -O gradle/wrapper/gradle-wrapper.jar
+          sed -i "s|REPLACE_ME_URL|${{ github.event.inputs.website_url }}|g" app/src/main/java/com/takbir/myapp/MainActivity.java
 
-      - name: Inject URL into MainActivity
-        run: |
-          if [ -f "MainActivity.java" ]; then
-            sed -i "s|REPLACE_ME_URL|${{ github.event.inputs.website_url }}|g" MainActivity.java
-          elif [ -f "app/src/main/java/com/takbir/myapp/MainActivity.java" ]; then
-            sed -i "s|REPLACE_ME_URL|${{ github.event.inputs.website_url }}|g" app/src/main/java/com/takbir/myapp/MainActivity.java
-          else
-            echo "MainActivity.java not found!"
-            exit 1
-          fi
-
-      - name: Grant Execute Permission for Gradlew
+      - name: Grant Execute Permission
         run: chmod +x gradlew
 
-      - name: Build APK with Gradle
-        run: ./gradlew assembleDebug
+      - name: Clean and Build APK
+        # ./gradlew clean ব্যবহার করলে পুরানো ডাটা মুছে যাবে
+        run: ./gradlew clean assembleDebug
 
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Takbir-App-Debug
